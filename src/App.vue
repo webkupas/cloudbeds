@@ -1,28 +1,44 @@
 <template>
   <div id="app">
-    <img src="./assets/logo.png">
-    <HelloWorld msg="Welcome to Your Vue.js App"/>
+    <clb-grid
+      :sizeX="sizeX"
+      :sizeY="sizeY"
+    />
   </div>
 </template>
 
 <script>
-import HelloWorld from './components/HelloWorld.vue'
-
+import Grid from '@/components/Grid'
 export default {
   name: 'app',
+  data () {
+    return {
+      sizeX: 40000,
+      sizeY: 40000
+    }
+  },
   components: {
-    HelloWorld
+    'clb-grid': Grid
   }
 }
 </script>
 
 <style lang="scss">
+*,
+*:before,
+*:after{
+  box-sizing: border-box;
+}
+body{
+  // overflow: hidden;
+}
 #app {
   font-family: 'Avenir', Helvetica, Arial, sans-serif;
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
   text-align: center;
   color: #2c3e50;
-  margin-top: 60px;
+  padding-top: 30px;
+  height: 100vh;
 }
 </style>
