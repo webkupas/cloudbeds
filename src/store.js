@@ -6,12 +6,14 @@ export default new Vuex.Store({
   state: {
     renderedItems: {},
     rullerX: [],
-    rullerY: []
+    rullerY: [],
+    dataToSave: {}
   },
   getters: {
     renderedItems: state => state.renderedItems,
     rullerX: state => state.rullerX,
-    rullerY: state => state.rullerY
+    rullerY: state => state.rullerY,
+    dataToSave: state => state.dataToSave
   },
   mutations: {
     addItems (state, items) {
@@ -24,6 +26,15 @@ export default new Vuex.Store({
         state.rullerX.push(elem.x)
         state.rullerY.push(elem.y)
       })
+    },
+    addDataToSave (state, data) {
+      Vue.set(state.dataToSave, data.x + 'x' + data.y, {
+        text: data.text,
+        disabled: data.disabled
+      })
+    },
+    flushDataToSave (state) {
+      state.dataToSave = {}
     }
   },
   actions: {
@@ -71,6 +82,23 @@ export default new Vuex.Store({
         })
       })
       commit('addItems', LoadingtemsSet)
+    },
+    addDataToSave ({commit}, data) {
+      commit('addDataToSave', data)
+    },
+    sendData ({getters, commit}) {
+      let dataToSend = []
+      let keys = Object.keys(getters.dataToSave)
+      keys.forEach(elem => {
+        dataToSend.push({
+          x: elem.split('x')[0],
+          y: elem.split('x')[1],
+          text: getters.dataToSave[elem].text,
+          disabled: getters.dataToSave[elem].disabled
+        })
+      })
+      console.log('Bye bye my dear data! I will never miss:', dataToSend)
+      commit('flushDataToSave')
     }
   }
 })

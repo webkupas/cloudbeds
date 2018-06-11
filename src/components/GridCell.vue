@@ -1,7 +1,7 @@
 <template>
   <div class="cell" :class="state" :data-row="row" :data-col="col" :style="styles">
     <label class="cell-chkb">
-      <input type="checkbox" :value="disabled" @change="$emit('update:disabled', !disabled)">
+      <input type="checkbox" :value="disabled" @change="$emit('update:disabled', !disabled); addDataToSave($event)">
       <i></i>
     </label>
     <div class="cell-text">
@@ -9,6 +9,7 @@
         :value="text"
         :disabled="disabled"
         @input="$emit('update:text', $event.target.value)"
+        @change="addDataToSave"
         @keypress="typeOnlyDigits">
     </div>
 
@@ -52,6 +53,14 @@ export default {
   methods: {
     typeOnlyDigits (e) {
       if (e.which !== 8 && e.which !== 0 && (e.which < 48 || e.which > 57)) e.preventDefault()
+    },
+    addDataToSave (e) {
+      this.$store.dispatch('addDataToSave', {
+        x: this.col,
+        y: this.row,
+        text: this.text,
+        disabled: (e.target.type === 'text') ? this.disabled : !this.disabled
+      })
     }
   },
   created () {
@@ -174,7 +183,8 @@ export default {
 
     .cell.active &{
       opacity: 0;
-      transform: scale(.4)
+      transform: scale(.4);
+      z-index: -1;
     }
 
     .cell.loading &{

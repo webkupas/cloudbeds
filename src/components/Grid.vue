@@ -28,11 +28,14 @@
           :disabled.sync="item.disabled"
         />
     </div>
+
+    <clb-save-btn :class="{active: Object.keys(dataToSave).length > 0}"/>
   </div>
 </template>
 
 <script>
 import Cell from '@/components/GridCell'
+import SaveBtn from '@/components/SaveButton'
 import {mapGetters} from 'vuex'
 import store from '@/store'
 import debounce from 'lodash/debounce'
@@ -56,7 +59,7 @@ export default {
     }
   },
   computed: {
-    ...mapGetters(['renderedItems', 'rullerX', 'rullerY']),
+    ...mapGetters(['renderedItems', 'rullerX', 'rullerY', 'dataToSave']),
     containerWidth () {
       return this.sizeX * 200 + 'px'
     },
@@ -65,7 +68,8 @@ export default {
     }
   },
   components: {
-    'clb-cell': Cell
+    'clb-cell': Cell,
+    'clb-save-btn': SaveBtn
   },
   methods: {
     rullersScroll (e) {
@@ -79,12 +83,10 @@ export default {
       let left = Math.floor(e.target.scrollLeft / 200) + 1
       let cols = Math.floor(window.innerWidth / 200) + 1
       let rows = Math.floor(window.innerHeight / 100) + 1
-      console.log('top:', top, 'left:', left)
-      console.log('rows:', rows, 'cols:', cols, 'total:', rows * cols)
 
       let initSet = []
       let rowMax = (rows + top <= vm.sizeY) ? rows + top : vm.sizeY
-      let colMax = (rows + left <= vm.sizeX) ? rows + left : vm.sizeX
+      let colMax = (cols + left <= vm.sizeX) ? cols + left : vm.sizeX
       for (let i = top; i <= rowMax; i++) {
         for (let j = left; j <= colMax; j++) {
           initSet.push({x: j, y: i})
