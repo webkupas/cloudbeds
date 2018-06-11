@@ -5,11 +5,13 @@ Vue.use(Vuex)
 export default new Vuex.Store({
   state: {
     renderedItems: {},
-    rullerX: []
+    rullerX: [],
+    rullerY: []
   },
   getters: {
     renderedItems: state => state.renderedItems,
-    rullerX: state => state.rullerX
+    rullerX: state => state.rullerX,
+    rullerY: state => state.rullerY
   },
   mutations: {
     addItems (state, items) {
@@ -20,6 +22,7 @@ export default new Vuex.Store({
           state: elem.state
         })
         state.rullerX.push(elem.x)
+        state.rullerY.push(elem.y)
       })
     }
   },

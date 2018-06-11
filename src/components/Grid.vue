@@ -1,11 +1,23 @@
 <template>
-  <div class="grid" @scroll.passive="onScroll($event); rullerXScroll($event)">
+  <div class="grid" @scroll.passive="onScroll($event); rullersScroll($event)">
     <div class="grid-container" :style="{width: containerWidth, height: containerHeight}">
+      <div class="ruller-start"></div>
+      <!-- Ruller X -->
       <div class="ruller-x" :style="{width: containerWidth}" ref="rullerX">
         <div class="ruller-x-cell" v-for="(item, index) in rullerX" :key="'x-'+index" :style="{left: (item - 1) * 200 + 'px'}">
           {{ item }}
         </div>
       </div>
+      <!-- / Ruller X -->
+
+      <!-- Ruller Y -->
+      <div class="ruller-y" :style="{height: containerHeight}" ref="rullerY">
+        <div class="ruller-y-cell" v-for="(item, index) in rullerY" :key="'y-'+index" :style="{top: (item - 1) * 100 + 'px'}">
+          <span>{{ item }}</span>
+        </div>
+      </div>
+      <!-- / Ruller Y -->
+
        <clb-cell
           v-for="(item, key, index) in renderedItems"
           :key="index"
@@ -44,7 +56,7 @@ export default {
     }
   },
   computed: {
-    ...mapGetters(['renderedItems', 'rullerX']),
+    ...mapGetters(['renderedItems', 'rullerX', 'rullerY']),
     containerWidth () {
       return this.sizeX * 200 + 'px'
     },
@@ -56,8 +68,9 @@ export default {
     'clb-cell': Cell
   },
   methods: {
-    rullerXScroll (e) {
-      this.$refs.rullerX.style.left = -e.target.scrollLeft + 29 + 'px'
+    rullersScroll (e) {
+      this.$refs.rullerX.style.left = -e.target.scrollLeft + 30 + 'px'
+      this.$refs.rullerY.style.top = -e.target.scrollTop + 30 + 'px'
     },
     onScroll: debounce((e) => {
       let vm = (this === undefined) ? e.target.__vue__ : this
@@ -113,15 +126,26 @@ export default {
     }
   }
 
+  .ruller-start{
+    position: fixed;
+    width: 30px;
+    height: 30px;
+    left: 0;
+    top: 0;
+    z-index: 10;
+    background: #fff;
+    border-bottom: 1px solid #bbb;
+    border-right: 1px solid #bbb;
+  }
+
   .ruller-x{
     height: 30px;
     background: #eee;
     position: fixed;
     top: 0;
-    left: 29px;
+    left: 30px;
     z-index: 5;
     display: flex;
-    border-left: 1px solid #bbb;
 
     &-cell{
       width: 200px;
@@ -129,13 +153,43 @@ export default {
       display: flex;
       align-items: center;
       justify-content: center;
-      font: 300 14px/1.2 Arial, sans-serif;
+      font-size: 14px;
       color: #444;
       border-right: 1px solid #bbb;
       border-bottom: 1px solid #bbb;
       position: absolute;
       top: 0;
       z-index: 1;
+    }
+  }
+
+  .ruller-y{
+    width: 30px;
+    background: #eee;
+    position: fixed;
+    left: 0;
+    top: 30px;
+    z-index: 5;
+    display: flex;
+    flex-direction: column;
+
+    &-cell{
+      height: 100px;
+      width: 30px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 14px;
+      color: #444;
+      border-right: 1px solid #bbb;
+      border-bottom: 1px solid #bbb;
+      position: absolute;
+      left: 0;
+      z-index: 1;
+      >span{
+        writing-mode: tb-rl;
+        transform: rotate(180deg)
+      }
     }
   }
 </style>
