@@ -67,8 +67,6 @@ export default {
     bottom: 0;
     width: 200px;
     height: 100px;
-    border-top: none;
-    border-right: none;
     background: #fff;
     display: flex;
     outline: 1px solid #bbb;
