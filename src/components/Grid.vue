@@ -1,17 +1,13 @@
 <template>
   <div class="grid" @scroll.passive="onScroll">
     <div class="grid-container" :style="{width: containerWidth, height: containerHeight}">
-      <template v-for="(row, rowIndex) in renderedItems" v-if="row !== undefined">
-        <clb-cell
-          v-if="cell !== undefined"
-          v-for="(cell, colIndex) in row"
-          :key="rowIndex + '-' + colIndex"
-          :row="colIndex"
-          :col="rowIndex"
-          :text="(cell.text !== undefined) ? cell.text : ''"
+       <clb-cell
+          v-for="(item, key, index) in renderedItems"
+          :key="index"
+          :row="+key.split('x')[1]"
+          :col="+key.split('x')[0]"
+          :text="item.text"
         />
-      </template>
-
     </div>
   </div>
 </template>
@@ -62,13 +58,12 @@ export default {
       console.log('rows:', rows, 'cols:', cols, 'total:', rows * cols)
 
       let initSet = []
-      for (let i = top; i <= rows + top - 1; i++) {
-        for (let j = left; j <= cols + left - 1; j++) {
+
+      for (let i = top; i <= rows + top; i++) {
+        for (let j = left; j <= cols + left; j++) {
           initSet.push({x: j, y: i})
         }
       }
-
-      // console.log(initSet)
 
       store.dispatch('addItems', initSet)
     }, 100)

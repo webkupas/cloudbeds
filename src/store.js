@@ -7,7 +7,7 @@ Vue.use(Vuex)
 
 export default new Vuex.Store({
   state: {
-    renderedItems: []
+    renderedItems: {}
   },
   getters: {
     renderedItems: state => state.renderedItems
@@ -15,9 +15,7 @@ export default new Vuex.Store({
   mutations: {
     addItems (state, items) {
       items.forEach(elem => {
-        if (state.renderedItems[elem.x] === undefined) Vue.set(state.renderedItems, [elem.x], [])
-
-        Vue.set(state.renderedItems[elem.x], elem.y, {
+        Vue.set(state.renderedItems, elem.x + 'x' + elem.y, {
           text: elem.text,
           disabled: elem.disabled,
           state: elem.state
@@ -57,7 +55,9 @@ export default new Vuex.Store({
       }
     },
     filterNewItems ({getters}, items) {
-      let itemsToAdd = items.filter(elem => getters.renderedItems[elem.x] === undefined || getters.renderedItems[elem.x][elem.y] === undefined)
+      let itemsToAdd = items.filter(elem => getters.renderedItems[elem.x + 'x' + elem.y] === undefined)
+      console.log(itemsToAdd)
+
       return itemsToAdd
     },
     addPreloadedItems ({commit}, items) {
