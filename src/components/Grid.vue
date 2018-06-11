@@ -6,7 +6,9 @@
           :key="index"
           :row="+key.split('x')[1]"
           :col="+key.split('x')[0]"
-          :text="item.text"
+          :text.sync="item.text"
+          :state="item.state"
+          :disabled.sync="item.disabled"
         />
     </div>
   </div>

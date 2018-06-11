@@ -1,8 +1,5 @@
 import Vue from 'vue'
 import Vuex from 'vuex'
-import Rwg from 'random-word-generator'
-let randomWords = new Rwg()
-
 Vue.use(Vuex)
 
 export default new Vuex.Store({
@@ -42,7 +39,7 @@ export default new Vuex.Store({
             newItemsSet.push({
               x: elem.x,
               y: elem.y,
-              text: randomWords.generate(),
+              text: '' + elem.x + elem.y,
               disabled: false,
               state: 'active'
             })
