@@ -9,10 +9,13 @@
     "test:unit": "vue-cli-service test:unit"
   },
   "dependencies": {
+    "lodash": "^4.17.10",
     "normalize.css": "^8.0.0",
+    "random-word-generator": "^0.9.9",
     "vue": "^2.5.16",
     "vue-slider-component": "^2.7.1",
-    "vuex": "^3.0.1"
+    "vuex": "^3.0.1",
+    "vuex-persistedstate": "^2.5.4"
   },
   "devDependencies": {
     "@vue/cli-plugin-babel": "^3.0.0-beta.15",

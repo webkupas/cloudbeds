@@ -1,40 +1,26 @@
 <template>
-  <div class="grid">
-    <div class="grid-left">
-      <clb-slider
-        v-model="posY"
-        :max="sizeY"
-        :min="1"
-        :direction="'vertical'"
-        tooltip-dir="right"
-        width="8"
-        reverse
-        :style="{'height': '90%'}"
-      >
-      </clb-slider>
-    </div>
-    <div class="grid-right">
-      <div class="ruller-x">
-        <clb-slider
-          v-model="posX"
-          :max="sizeX"
-          :min="1"
-          width="90%"
-        >
-        </clb-slider>
-      </div>
-      <div class="grid-container">
-        <div class="grid-cells">
+  <div class="grid" @scroll.passive="onScroll">
+    <div class="grid-container" :style="{width: containerWidth, height: containerHeight}">
+      <template v-for="(row, rowIndex) in renderedItems" v-if="row !== undefined">
+        <clb-cell
+          v-if="cell !== undefined"
+          v-for="(cell, colIndex) in row"
+          :key="rowIndex + '-' + colIndex"
+          :row="colIndex"
+          :col="rowIndex"
+          :text="(cell.text !== undefined) ? cell.text : ''"
+        />
+      </template>
 
-        </div>
-      </div>
     </div>
-
   </div>
 </template>
 
 <script>
-import Slider from 'vue-slider-component'
+import Cell from '@/components/GridCell'
+import {mapGetters} from 'vuex'
+import store from '@/store'
+import debounce from 'lodash/debounce'
 export default {
   props: {
     sizeX: {
@@ -50,43 +36,71 @@ export default {
     return {
       label: '',
       active: false,
-      posX: 1,
+      posX: 3,
       posY: 1
     }
   },
+  computed: {
+    ...mapGetters(['renderedItems']),
+    containerWidth () {
+      return this.sizeX * 200 + 'px'
+    },
+    containerHeight () {
+      return this.sizeY * 100 + 'px'
+    }
+  },
   components: {
-    'clb-slider': Slider
+    'clb-cell': Cell
+  },
+  methods: {
+    onScroll: debounce((e) => {
+      let top = Math.floor(e.target.scrollTop / 100) + 1
+      let left = Math.floor(e.target.scrollLeft / 200) + 1
+      let cols = Math.floor(window.innerWidth / 200) + 1
+      let rows = Math.floor(window.innerHeight / 100) + 1
+      console.log('top:', top, 'left:', left)
+      console.log('rows:', rows, 'cols:', cols, 'total:', rows * cols)
+
+      let initSet = []
+      for (let i = top; i <= rows + top - 1; i++) {
+        for (let j = left; j <= cols + left - 1; j++) {
+          initSet.push({x: j, y: i})
+        }
+      }
+
+      // console.log(initSet)
+
+      store.dispatch('addItems', initSet)
+    }, 100)
+  },
+  created () {
+    /* Initial loading */
+    let cols = Math.floor(window.innerWidth / 200) + 1
+    let rows = Math.floor(window.innerHeight / 100) + 1
+    let initSet = []
+
+    for (let i = 1; i <= rows; i++) {
+      for (let j = 1; j <= cols; j++) {
+        initSet.push({x: j, y: i})
+      }
+    }
+
+    this.$store.dispatch('addItems', initSet)
   }
 }
 </script>
 
-<style lang="scss" scoped>
+<style lang="scss">
   .grid{
-    display: flex;
     height: 100%;
-    width: 100vw;
-
-    &-left{
-      width: 40px;
-      padding-top: 5%;
-    }
-
-    &-right{
-      flex: 1 0 auto;
-      display: flex;
-      flex-direction: column;
-    }
+    width: 100%;
+    position: relative;
+    overflow: auto;
 
     &-container{
       flex: 1 0 auto;
-      display: flex;
       flex-direction: column;
-      padding: 0 40px 40px 0;
-    }
-
-    &-cells{
-      background: #ddd;
-      flex: 1 0 auto;
+      overflow: hidden;
     }
   }
 

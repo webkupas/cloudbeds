@@ -30,7 +30,7 @@ export default {
   box-sizing: border-box;
 }
 body{
-  // overflow: hidden;
+  overflow: hidden;
 }
 #app {
   font-family: 'Avenir', Helvetica, Arial, sans-serif;
@@ -38,7 +38,6 @@ body{
   -moz-osx-font-smoothing: grayscale;
   text-align: center;
   color: #2c3e50;
-  padding-top: 30px;
   height: 100vh;
 }
 </style>
