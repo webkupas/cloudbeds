@@ -12,6 +12,13 @@ export default {
      */
     sendData () {
       this.$store.dispatch('sendData')
+        .then(() => {
+          let items = document.querySelectorAll('[data-init-text], [data-init-disabled]')
+          Array.from(items).forEach(elem => {
+            delete elem.dataset.initText
+            delete elem.dataset.initDisabled
+          })
+        })
     }
   }
 }

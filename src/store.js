@@ -22,14 +22,27 @@ export default new Vuex.Store({
     renderedItems: {},
     /**
      * Stores already rendered ruller cells by x axios
+     * example: [1,2,3,6,...90, ..]
      */
     rullerX: [],
     /**
      * Stores already rendered ruller cells by x axios
+     * example: [1,2,3,6,...90, ..]
      */
     rullerY: [],
     /**
      * Stores updated Items.
+     * example:
+     *  {
+     *  ...
+     *  12x456 : { // property name consists from item coords 12x456 = x:12, y:456
+     *    initDisabled: false,
+     *    disabled: false,
+     *    initText: '10',
+     *    text: '101',
+     *  }
+     *  ...
+     * }
      */
     dataToSave: {}
   },
@@ -52,7 +65,7 @@ export default new Vuex.Store({
      *    x: 1, // Number
      *    y: 3, // Number
      *    text: '123123', // String (only digits allows)
-     *    disabled: false, // Boolean (do disable text updating)
+     *    disabled: false, // Boolean (to disable text updating)
      *    state: 'active' // String ('active'|'loading' - to add specific styles on frontend)
      *  },
      *  ...
@@ -79,15 +92,27 @@ export default new Vuex.Store({
      * data = {
      *  x: 1, // Number
      *  y: 3, // Number
-     *  text: '123123', // String (only digits allows)
-     *  disabled: false, // Boolean (do disable text updating)
+     *  data: {
+     *    text: '123123', // String (only digits allows)
+     *    disabled: false, // Boolean (to disable text updating)
+     *    initText: '123' // initial text
+     *    initDisabled: false // initial disable state
+     *  }
      * }
      */
     addDataToSave (state, data) {
-      Vue.set(state.dataToSave, data.x + 'x' + data.y, {
-        text: data.text,
-        disabled: data.disabled
-      })
+      Vue.set(state.dataToSave, data.x + 'x' + data.y, data.data)
+    },
+    /**
+     * Remove item from state.dataToSave by it's uniq property name
+     * @param  state
+     * @param  {String} propertyName
+     *
+     * example:
+     * propertyName = '12x427'
+     */
+    removeDataToSave (state, propertyName) {
+      Vue.delete(state.dataToSave, propertyName)
     },
     /**
      * Remove all date from dataToSave.
@@ -212,11 +237,55 @@ export default new Vuex.Store({
      *  x: 1, // Number
      *  y: 3, // Number
      *  text: '123123', // String (only digits allows)
-     *  disabled: false, // Boolean (do disable text updating)
+     *  disabled: false, // Boolean (to disable text updating)
      * }
      */
-    addDataToSave ({commit}, data) {
-      commit('addDataToSave', data)
+    addDataToSave ({getters, commit}, data) {
+      let currentState = getters.dataToSave[data.x + 'x' + data.y] || {}
+      currentState.disabled = data.disabled
+      currentState.text = data.text
+
+      /* If current Item state similar to it initial state then remove it from state.dataToSave */
+      if (currentState.disabled === currentState.initDisabled && currentState.text === currentState.initText) {
+        commit('removeDataToSave', data.x + 'x' + data.y)
+      } else {
+        /* else add Item to state.dataToSave */
+        commit('addDataToSave', {x: data.x, y: data.y, data: currentState})
+      }
+    },
+    /**
+     * Add initial text state
+     * @param {getters, commit}
+     * @param {Object} data
+     *
+     * example:
+     * data = {
+     *  x: 1, // Number
+     *  y: 3, // Number
+     *  initText: '123123', // String (only digits allows)
+     * }
+     */
+    addInitTextState ({getters, commit}, data) {
+      let currentState = getters.dataToSave[data.x + 'x' + data.y] || {}
+      currentState.initText = data.initText
+      commit('addDataToSave', {x: data.x, y: data.y, data: currentState})
+    },
+    /**
+     * Add initial text state
+     * @param {getters, commit}
+     * @param {Object} data
+     *
+     * example:
+     * data = {
+     *  x: 1, // Number
+     *  y: 3, // Number
+     *  initDisabled: false, // Boolean (to disable text updating)
+     * }
+     */
+    addInitDisabledState ({getters, commit}, data) {
+      let currentState = getters.dataToSave[data.x + 'x' + data.y] || {}
+      currentState.initDisabled = data.initDisabled
+      commit('addDataToSave', {x: data.x, y: data.y, data: currentState})
     },
     /**
      * Send updated data and flush state.dataToSave
@@ -229,7 +298,7 @@ export default new Vuex.Store({
      *    x: 1, // Number
      *    y: 3, // Number
      *    text: '123123', // String (only digits allows)
-     *    disabled: false, // Boolean (do disable text updating)
+     *    disabled: false, // Boolean (to disable text updating)
      *  }
      *  ...
      * ]

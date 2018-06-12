@@ -1,16 +1,20 @@
 <template>
   <div class="cell" :class="state" :data-row="row" :data-col="col" :style="styles">
     <label class="cell-chkb">
-      <input type="checkbox" :value="disabled" @change="$emit('update:disabled', !disabled); addDataToSave($event)">
+      <input type="checkbox"
+            :id="'chkb-'+col+'-'+row"
+            :value="disabled"
+            @change="$emit('update:disabled', !disabled); beforeDisabledUpdate($event); addDataToSave($event);">
       <i></i>
     </label>
     <div class="cell-text">
       <input type="text"
         :value="text"
         :disabled="disabled"
-        @input="$emit('update:text', $event.target.value.replace(/\D+/g, ''))"
-        @change="addDataToSave"
-        @keypress="typeOnlyDigits">
+        @input="$emit('update:text', $event.target.value.replace(/\D+/g, '')); addDataToSave($event)"
+        @keypress="typeOnlyDigits($event);"
+        @keydown="beforeTextUpdate"
+        @paste="beforeTextUpdate">
     </div>
 
     <div class="cell-preloader">
@@ -53,6 +57,47 @@ export default {
   },
   methods: {
     /**
+     * Set initial "text" and "disabled" states
+     */
+    beforeTextUpdate (e) {
+      if (e.which === 8 || e.which === 0 || (e.which > 48 && e.which < 57)) { // checking if digit key was pressed
+        /* set data-init-text attribute if it does not and add initial data to store */
+        if (e.target.dataset.initText === undefined) {
+          e.target.dataset.initText = e.target.value
+          this.$store.dispatch('addInitTextState', {
+            x: this.col,
+            y: this.row,
+            initText: e.target.value
+          })
+        }
+
+        /* set data-init-disabled attribute if it does not and add initial data to store */
+        let chkb = document.getElementById('chkb-' + this.col + '-' + this.row)
+        if (chkb.dataset.initDisabled === undefined) {
+          chkb.dataset.initDisabled = this.disabled
+          this.$store.dispatch('addInitDisabledState', {
+            x: this.col,
+            y: this.row,
+            initDisabled: this.disabled
+          })
+        }
+      }
+    },
+    /**
+     * Set initial "disabled" states
+     */
+    beforeDisabledUpdate (e) {
+      /* set data-init-disabled attribute if it does not and add initial data to store */
+      if (e.target.dataset.initDisabled === undefined) {
+        e.target.dataset.initDisabled = !this.disabled
+        this.$store.dispatch('addInitDisabledState', {
+          x: this.col,
+          y: this.row,
+          initDisabled: this.disabled
+        })
+      }
+    },
+    /**
      * Method allows to input only digits
      */
     typeOnlyDigits (e) {
@@ -62,10 +107,17 @@ export default {
      * Move data to store
      */
     addDataToSave (e) {
+      /* Remove data-init-set if it is equal to value */
+      if (e.target.type === 'text' &&
+          e.target.dataset.initText !== undefined &&
+          e.target.value === e.target.dataset.initText) {
+        delete e.target.dataset.initText
+      }
+
       this.$store.dispatch('addDataToSave', {
         x: this.col,
         y: this.row,
-        text: this.text,
+        text: (e.target.type === 'text') ? e.target.value.replace(/\D+/g, '') : this.text,
         disabled: (e.target.type === 'text') ? this.disabled : !this.disabled
       })
     }
