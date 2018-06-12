@@ -1,9 +1,6 @@
 <template>
   <div id="app">
-    <clb-grid
-      :sizeX="sizeX"
-      :sizeY="sizeY"
-    />
+    <clb-grid />
   </div>
 </template>
 
@@ -11,12 +8,6 @@
 import Grid from '@/components/Grid'
 export default {
   name: 'app',
-  data () {
-    return {
-      sizeX: 40000,
-      sizeY: 40000
-    }
-  },
   components: {
     'clb-grid': Grid
   }

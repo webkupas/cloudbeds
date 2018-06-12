@@ -21,6 +21,7 @@
 </template>
 
 <script>
+import appConfig from '@/app-config'
 export default {
   props: {
     disabled: {
@@ -45,16 +46,21 @@ export default {
   computed: {
     styles () {
       return {
-        left: (this.col - 1) * 200 + 'px',
-        top: (this.row - 1) * 100 + 'px'
+        left: (this.col - 1) * appConfig.cellWidth + 'px',
+        top: (this.row - 1) * appConfig.cellHeight + 'px'
       }
-    },
-    width: 100
+    }
   },
   methods: {
+    /**
+     * Method allows to input only digits
+     */
     typeOnlyDigits (e) {
       if (e.which !== 8 && e.which !== 0 && (e.which < 48 || e.which > 57)) e.preventDefault()
     },
+    /**
+     * Move data to store
+     */
     addDataToSave (e) {
       this.$store.dispatch('addDataToSave', {
         x: this.col,

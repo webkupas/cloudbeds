@@ -7,6 +7,9 @@
 <script>
 export default {
   methods: {
+    /**
+     * Send uptaded data
+     */
     sendData () {
       this.$store.dispatch('sendData')
     }

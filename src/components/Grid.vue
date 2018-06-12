@@ -1,23 +1,9 @@
 <template>
-  <div class="grid" @scroll.passive="onScroll($event); rullersScroll($event)" ref="grid" id="grid">
+  <div class="grid" @scroll.passive="onScroll($event); rullersScroll($event)" ref="grid">
     <div class="grid-container" :style="{width: containerWidth, height: containerHeight}">
       <div class="ruller-start"></div>
-
-      <!-- Ruller X -->
-      <div class="ruller-x" :style="{width: containerWidth}" ref="rullerX">
-        <div class="ruller-x-cell" v-for="(item, index) in rullerX" :key="'x-'+index" :style="{left: (item - 1) * 200 + 'px'}">
-          {{ item }}
-        </div>
-      </div>
-      <!-- / Ruller X -->
-
-      <!-- Ruller Y -->
-      <div class="ruller-y" :style="{height: containerHeight}" ref="rullerY">
-        <div class="ruller-y-cell" v-for="(item, index) in rullerY" :key="'y-'+index" :style="{top: (item - 1) * 100 + 'px'}">
-          <span>{{ item }}</span>
-        </div>
-      </div>
-      <!-- / Ruller Y -->
+      <clb-ruler-x :width="containerWidth" ref="rullerX"/>
+      <clb-ruler-y :height="containerHeight" ref="rullerY"/>
 
        <clb-cell
           v-for="(item, key, index) in renderedItems"
@@ -36,66 +22,78 @@
 </template>
 
 <script>
+import appConfig from '@/app-config'
+import {mapGetters} from 'vuex'
+import debounce from 'lodash/debounce'
 import Cell from '@/components/GridCell'
 import SaveBtn from '@/components/SaveButton'
-import {mapGetters} from 'vuex'
-import store from '@/store'
-import debounce from 'lodash/debounce'
+import RullerX from '@/components/RullerX'
+import RullerY from '@/components/RullerY'
 export default {
-  props: {
-    sizeX: {
-      type: Number,
-      default: 100
-    },
-    sizeY: {
-      type: Number,
-      default: 100
-    }
-  },
   data () {
     return {
-      label: '',
-      active: false,
-      posX: 3,
-      posY: 1
+      cellWidth: appConfig.cellWidth,
+      cellHeight: appConfig.cellHeight
     }
   },
   computed: {
     ...mapGetters([
       'renderedItems',
-      'rullerX',
-      'rullerY',
       'dataToSave']),
+    /**
+     * Entire grid container width
+     */
     containerWidth () {
-      return this.sizeX * 200 + 'px'
+      return appConfig.sizeX * appConfig.cellWidth + 'px'
     },
+    /**
+     * Entire grid container height
+     */
     containerHeight () {
-      return this.sizeY * 100 + 'px'
+      return appConfig.sizeY * appConfig.cellHeight + 'px'
     }
   },
   components: {
     'clb-cell': Cell,
-    'clb-save-btn': SaveBtn
+    'clb-save-btn': SaveBtn,
+    'clb-ruler-x': RullerX,
+    'clb-ruler-y': RullerY
   },
   methods: {
+    /**
+     * Scroll event handler.
+     * Scroll horizontal and vertical rullers within main grid container
+     */
     rullersScroll (e) {
-      this.$refs.rullerX.style.left = -e.target.scrollLeft + 30 + 'px'
-      this.$refs.rullerY.style.top = -e.target.scrollTop + 30 + 'px'
+      this.$refs.rullerX.$el.style.left = -e.target.scrollLeft + 30 + 'px'
+      this.$refs.rullerY.$el.style.top = -e.target.scrollTop + 30 + 'px'
     },
+    /**
+     * Scroll event handler to get all cell in viewport to manage them from store.
+     * Use 100 ms delay for better performance
+     */
     onScroll: debounce((e) => {
       let vm = (this === undefined) ? e.target.__vue__ : this
       let initSet = vm.getViewportAreaCells(vm, e.target)
-      store.dispatch('addItems', initSet)
+      vm.$store.dispatch('addItems', initSet)
     }, 100),
+    /**
+     * Returns array of cells located in current viewport
+     * @param  vm - component reference
+     * @param  {DOMNode} gridDOMNode - grid container DOM node
+     * @param  {Boolean} isInitialLoading=false - true for initial loading
+     *
+     * @returns {Array}
+     */
     getViewportAreaCells (vm, gridDOMNode, isInitialLoading = false) {
-      let top = isInitialLoading ? 1 : Math.floor(gridDOMNode.scrollTop / 100) + 1
-      let left = isInitialLoading ? 1 : Math.floor(gridDOMNode.scrollLeft / 200) + 1
-      let cols = Math.floor(window.innerWidth / 200) + 1
-      let rows = Math.floor(window.innerHeight / 100) + 1
+      let top = isInitialLoading ? 1 : Math.floor(gridDOMNode.scrollTop / appConfig.cellHeight) + 1
+      let left = isInitialLoading ? 1 : Math.floor(gridDOMNode.scrollLeft / appConfig.cellWidth) + 1
+      let cols = Math.floor(window.innerWidth / appConfig.cellWidth) + 1
+      let rows = Math.floor(window.innerHeight / appConfig.cellHeight) + 1
 
       let initSet = []
-      let rowMax = (rows + top <= vm.sizeY) ? rows + top : vm.sizeY
-      let colMax = (cols + left <= vm.sizeX) ? cols + left : vm.sizeX
+      let rowMax = (rows + top <= appConfig.sizeY) ? rows + top : appConfig.sizeY
+      let colMax = (cols + left <= appConfig.sizeX) ? cols + left : appConfig.sizeX
 
       for (let i = top; i <= rowMax; i++) {
         for (let j = left; j <= colMax; j++) {
@@ -110,9 +108,12 @@ export default {
     let initSet = this.getViewportAreaCells(this, null, true)
     this.$store.dispatch('addItems', initSet)
 
+    /**
+     * Rezize window event handler to get all cell in viewport to manage them from store
+     */
     window.addEventListener('resize', () => {
       let initSet = this.getViewportAreaCells(this, this.$refs.grid)
-      store.dispatch('addItems', initSet)
+      this.$store.dispatch('addItems', initSet)
     })
   }
 }
@@ -143,60 +144,5 @@ export default {
     background: #fff;
     border-bottom: 1px solid #bbb;
     border-right: 1px solid #bbb;
-  }
-
-  .ruller-x{
-    height: 30px;
-    background: #eee;
-    position: fixed;
-    top: 0;
-    left: 30px;
-    z-index: 5;
-    display: flex;
-
-    &-cell{
-      width: 200px;
-      height: 30px;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      font-size: 14px;
-      color: #444;
-      border-right: 1px solid #bbb;
-      border-bottom: 1px solid #bbb;
-      position: absolute;
-      top: 0;
-      z-index: 1;
-    }
-  }
-
-  .ruller-y{
-    width: 30px;
-    background: #eee;
-    position: fixed;
-    left: 0;
-    top: 30px;
-    z-index: 5;
-    display: flex;
-    flex-direction: column;
-
-    &-cell{
-      height: 100px;
-      width: 30px;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      font-size: 14px;
-      color: #444;
-      border-right: 1px solid #bbb;
-      border-bottom: 1px solid #bbb;
-      position: absolute;
-      left: 0;
-      z-index: 1;
-      >span{
-        writing-mode: tb-rl;
-        transform: rotate(180deg)
-      }
-    }
   }
 </style>
