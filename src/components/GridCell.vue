@@ -8,7 +8,7 @@
       <input type="text"
         :value="text"
         :disabled="disabled"
-        @input="$emit('update:text', $event.target.value)"
+        @input="$emit('update:text', $event.target.value.replace(/\D+/g, ''))"
         @change="addDataToSave"
         @keypress="typeOnlyDigits">
     </div>
