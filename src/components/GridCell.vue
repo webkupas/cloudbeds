@@ -14,7 +14,7 @@
     </div>
 
     <div class="cell-preloader">
-      <div class="lds-ripple"><div></div><div></div></div>
+      <div class="ripple"><div></div><div></div></div>
     </div>
 
   </div>
@@ -48,7 +48,8 @@ export default {
         left: (this.col - 1) * 200 + 'px',
         top: (this.row - 1) * 100 + 'px'
       }
-    }
+    },
+    width: 100
   },
   methods: {
     typeOnlyDigits (e) {
@@ -62,9 +63,6 @@ export default {
         disabled: (e.target.type === 'text') ? this.disabled : !this.disabled
       })
     }
-  },
-  created () {
-    // console.log(this.text)
   }
 }
 </script>
@@ -193,7 +191,7 @@ export default {
     }
   }
 
-  .lds-ripple {
+  .ripple {
     display: inline-block;
     position: absolute;
     top: 0;
@@ -204,17 +202,17 @@ export default {
     width: 64px;
     height: 64px;
   }
-  .lds-ripple div {
+  .ripple div {
     position: absolute;
     border: 2px solid #bbb;
     opacity: 1;
     border-radius: 50%;
-    animation: lds-ripple 1s cubic-bezier(0, 0.2, 0.8, 1) infinite;
+    animation: ripple 1s cubic-bezier(0, 0.2, 0.8, 1) infinite;
   }
-  .lds-ripple div:nth-child(2) {
+  .ripple div:nth-child(2) {
     animation-delay: -0.5s;
   }
-  @keyframes lds-ripple {
+  @keyframes ripple {
     0% {
       top: 28px;
       left: 28px;

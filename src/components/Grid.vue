@@ -1,7 +1,8 @@
 <template>
-  <div class="grid" @scroll.passive="onScroll($event); rullersScroll($event)">
+  <div class="grid" @scroll.passive="onScroll($event); rullersScroll($event)" ref="grid" id="grid">
     <div class="grid-container" :style="{width: containerWidth, height: containerHeight}">
       <div class="ruller-start"></div>
+
       <!-- Ruller X -->
       <div class="ruller-x" :style="{width: containerWidth}" ref="rullerX">
         <div class="ruller-x-cell" v-for="(item, index) in rullerX" :key="'x-'+index" :style="{left: (item - 1) * 200 + 'px'}">
@@ -27,6 +28,7 @@
           :state="item.state"
           :disabled.sync="item.disabled"
         />
+
     </div>
 
     <clb-save-btn :class="{active: Object.keys(dataToSave).length > 0}"/>
@@ -59,7 +61,11 @@ export default {
     }
   },
   computed: {
-    ...mapGetters(['renderedItems', 'rullerX', 'rullerY', 'dataToSave']),
+    ...mapGetters([
+      'renderedItems',
+      'rullerX',
+      'rullerY',
+      'dataToSave']),
     containerWidth () {
       return this.sizeX * 200 + 'px'
     },
@@ -78,37 +84,36 @@ export default {
     },
     onScroll: debounce((e) => {
       let vm = (this === undefined) ? e.target.__vue__ : this
-
-      let top = Math.floor(e.target.scrollTop / 100) + 1
-      let left = Math.floor(e.target.scrollLeft / 200) + 1
+      let initSet = vm.getViewportAreaCells(vm, e.target)
+      store.dispatch('addItems', initSet)
+    }, 100),
+    getViewportAreaCells (vm, gridDOMNode, isInitialLoading = false) {
+      let top = isInitialLoading ? 1 : Math.floor(gridDOMNode.scrollTop / 100) + 1
+      let left = isInitialLoading ? 1 : Math.floor(gridDOMNode.scrollLeft / 200) + 1
       let cols = Math.floor(window.innerWidth / 200) + 1
       let rows = Math.floor(window.innerHeight / 100) + 1
 
       let initSet = []
       let rowMax = (rows + top <= vm.sizeY) ? rows + top : vm.sizeY
       let colMax = (cols + left <= vm.sizeX) ? cols + left : vm.sizeX
+
       for (let i = top; i <= rowMax; i++) {
         for (let j = left; j <= colMax; j++) {
           initSet.push({x: j, y: i})
         }
       }
 
-      store.dispatch('addItems', initSet)
-    }, 100)
+      return initSet
+    }
   },
   created () {
-    /* Initial loading */
-    let cols = Math.floor(window.innerWidth / 200) + 1
-    let rows = Math.floor(window.innerHeight / 100) + 1
-    let initSet = []
-
-    for (let i = 1; i <= rows; i++) {
-      for (let j = 1; j <= cols; j++) {
-        initSet.push({x: j, y: i})
-      }
-    }
-
+    let initSet = this.getViewportAreaCells(this, null, true)
     this.$store.dispatch('addItems', initSet)
+
+    window.addEventListener('resize', () => {
+      let initSet = this.getViewportAreaCells(this, this.$refs.grid)
+      store.dispatch('addItems', initSet)
+    })
   }
 }
 </script>
