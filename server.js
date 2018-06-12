@@ -6,7 +6,9 @@ const port = process.env.PORT || 8080
 let app = express()
 
 app.use(serveStatic(path.join(__dirname, 'dist')))
-
+app.get('/', (req, res) => {
+  res.sendfile(path.join(__dirname, 'dist', 'index.html'))
+})
 app.listen(port, () => {
   console.log(`Server is start on port ${port}`)
 })
