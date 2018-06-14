@@ -241,51 +241,20 @@ export default new Vuex.Store({
      * }
      */
     addDataToSave ({getters, commit}, data) {
-      let currentState = getters.dataToSave[data.x + 'x' + data.y] || {}
-      currentState.disabled = data.disabled
-      currentState.text = data.text
+      // let currentState = getters.dataToSave[data.x + 'x' + data.y] || {}
+      // currentState.disabled = data.disabled
+      // currentState.text = data.text
+      // currentState.initDisabled = data.initDisabled
+      // currentState.initText = data.initText
 
       /* If current Item state similar to it initial state then remove it from state.dataToSave */
-      if (currentState.disabled === currentState.initDisabled && currentState.text === currentState.initText) {
+      if (data.disabled === data.initDisabled && data.text === data.initText) {
+        // console.log(data)
         commit('removeDataToSave', data.x + 'x' + data.y)
       } else {
         /* else add Item to state.dataToSave */
-        commit('addDataToSave', {x: data.x, y: data.y, data: currentState})
+        commit('addDataToSave', {x: data.x, y: data.y, data: data})
       }
-    },
-    /**
-     * Add initial text state
-     * @param {getters, commit}
-     * @param {Object} data
-     *
-     * example:
-     * data = {
-     *  x: 1, // Number
-     *  y: 3, // Number
-     *  initText: '123123', // String (only digits allows)
-     * }
-     */
-    addInitTextState ({getters, commit}, data) {
-      let currentState = getters.dataToSave[data.x + 'x' + data.y] || {}
-      currentState.initText = data.initText
-      commit('addDataToSave', {x: data.x, y: data.y, data: currentState})
-    },
-    /**
-     * Add initial text state
-     * @param {getters, commit}
-     * @param {Object} data
-     *
-     * example:
-     * data = {
-     *  x: 1, // Number
-     *  y: 3, // Number
-     *  initDisabled: false, // Boolean (to disable text updating)
-     * }
-     */
-    addInitDisabledState ({getters, commit}, data) {
-      let currentState = getters.dataToSave[data.x + 'x' + data.y] || {}
-      currentState.initDisabled = data.initDisabled
-      commit('addDataToSave', {x: data.x, y: data.y, data: currentState})
     },
     /**
      * Send updated data and flush state.dataToSave
